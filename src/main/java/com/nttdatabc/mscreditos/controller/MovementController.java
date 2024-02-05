@@ -1,6 +1,7 @@
 package com.nttdatabc.mscreditos.controller;
 
 import com.nttdatabc.mscreditos.controller.interfaces.MovementControllerApi;
+import com.nttdatabc.mscreditos.model.HasDebtResponse;
 import com.nttdatabc.mscreditos.model.MovementCredit;
 import com.nttdatabc.mscreditos.model.PaidInstallment;
 import com.nttdatabc.mscreditos.service.MovementServiceImpl;
@@ -8,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
@@ -77,6 +80,15 @@ public class MovementController implements MovementControllerApi {
         .doOnSubscribe(unused -> log.info("updateMovementCredit:: iniciando"))
         .doOnError(throwable -> log.error("updateMovementCredit:: error " + throwable.getMessage()))
         .doOnSuccess((e) -> log.info("updateMovementCredit:: finalizado con exito"))
+        , HttpStatus.OK);
+  }
+
+  @GetMapping("/movement_credits/has_debt/{customerId}")
+  public ResponseEntity<Mono<HasDebtResponse>>hasDebtCreditCustomer(@PathVariable String customerId){
+    return new ResponseEntity<>(movementServiceImpl.hasDebtCreditCustomerService(customerId)
+        .doOnSubscribe(unused -> log.info("hasDebtCreditCustomer:: iniciando"))
+        .doOnError(throwable -> log.error("hasDebtCreditCustomer:: error " + throwable.getMessage()))
+        .doOnSuccess((e) -> log.info("hasDebtCreditCustomer:: finalizado con exito"))
         , HttpStatus.OK);
   }
 }

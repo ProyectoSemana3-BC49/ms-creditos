@@ -1,5 +1,7 @@
 package com.nttdatabc.mscreditos.service;
 
+import com.nttdatabc.mscreditos.model.Credit;
+import com.nttdatabc.mscreditos.model.HasDebtResponse;
 import com.nttdatabc.mscreditos.model.MovementCredit;
 import com.nttdatabc.mscreditos.model.PaidInstallment;
 import com.nttdatabc.mscreditos.model.enums.StatusCredit;
@@ -7,6 +9,7 @@ import com.nttdatabc.mscreditos.repository.MovementRepository;
 import com.nttdatabc.mscreditos.service.interfaces.MovementService;
 import com.nttdatabc.mscreditos.utils.Utilitarios;
 import com.nttdatabc.mscreditos.utils.exceptions.errors.ErrorResponseException;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,10 +17,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.nttdatabc.mscreditos.utils.Constantes.*;
+import static com.nttdatabc.mscreditos.utils.CreditValidator.verifyCustomerExists;
 import static com.nttdatabc.mscreditos.utils.MovementValidator.*;
 
 /**
@@ -128,5 +134,33 @@ public class MovementServiceImpl implements MovementService {
     return getMovementCreditByIdService(movementId)
         .flatMap(movementCredit -> movementRepository.delete(movementCredit))
         .then();
+  }
+
+  @Override
+  public Mono<HasDebtResponse> hasDebtCreditCustomerService(String customerId) {
+    return
+        creditServiceImpl.getCreditsByCustomerId(customerId)
+            .switchIfEmpty(Mono.just(new Credit()))
+        .flatMap(creditCustomer -> {
+          if(creditCustomer.getId() == null){
+            return Mono.just(new HasDebtResponse(false));
+          }
+         return getMovementsCreditsByCreditIdService(creditCustomer.getId())
+             .filter(movementCredit -> movementCredit.getStatus().equals("ACTIVO"))
+             .any(movementCredit -> {
+               Integer dueDate = Integer.parseInt(movementCredit.getDueDate());
+               List<PaidInstallment> paidMents = movementCredit.getPaidInstallments();
+               if(paidMents.isEmpty()){
+                 return false;
+               }
+               Boolean isAfterPaid = paidMents.stream().anyMatch(paidInstallment -> {
+                 LocalDateTime dayPayment = LocalDateTime.parse(paidInstallment.getDatePayment());
+                 return dayPayment.getDayOfMonth() > dueDate;
+               });
+               return isAfterPaid;
+
+             }).flatMap(aBoolean -> Mono.just(new HasDebtResponse(aBoolean)));
+        }).flatMap(Mono::just)
+        .single();
   }
 }

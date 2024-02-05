@@ -1,5 +1,6 @@
 package com.nttdatabc.mscreditos.service.interfaces;
 
+import com.nttdatabc.mscreditos.model.HasDebtResponse;
 import com.nttdatabc.mscreditos.model.MovementCredit;
 import com.nttdatabc.mscreditos.model.PaidInstallment;
 import reactor.core.publisher.Flux;
@@ -20,5 +21,6 @@ public interface MovementService {
   Mono<Void> updateMovementCreditService(MovementCredit movementCredit);
 
   Mono<Void> deleteMovementCredit(String movementId);
+  Mono<HasDebtResponse>hasDebtCreditCustomerService(String customerId);
 }
 
