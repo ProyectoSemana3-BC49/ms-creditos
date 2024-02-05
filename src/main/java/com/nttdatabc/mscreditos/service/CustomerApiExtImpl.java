@@ -1,5 +1,9 @@
 package com.nttdatabc.mscreditos.service;
 
+
+import static com.nttdatabc.mscreditos.utils.Constantes.EX_NOT_FOUND_RECURSO;
+import static com.nttdatabc.mscreditos.utils.Constantes.URL_CUSTOMER_ID;
+
 import com.nttdatabc.mscreditos.model.CustomerExt;
 import com.nttdatabc.mscreditos.service.interfaces.CustomerApiExt;
 import com.nttdatabc.mscreditos.utils.exceptions.errors.ErrorResponseException;
@@ -9,8 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import static com.nttdatabc.mscreditos.utils.Constantes.EX_NOT_FOUND_RECURSO;
-import static com.nttdatabc.mscreditos.utils.Constantes.URL_CUSTOMER_ID;
 
 @Service
 public class CustomerApiExtImpl implements CustomerApiExt {

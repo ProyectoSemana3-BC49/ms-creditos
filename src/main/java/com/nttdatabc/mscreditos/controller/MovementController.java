@@ -1,5 +1,7 @@
 package com.nttdatabc.mscreditos.controller;
 
+import static com.nttdatabc.mscreditos.utils.Constantes.PREFIX_PATH;
+
 import com.nttdatabc.mscreditos.controller.interfaces.MovementControllerApi;
 import com.nttdatabc.mscreditos.model.HasDebtResponse;
 import com.nttdatabc.mscreditos.model.MovementCredit;
@@ -17,7 +19,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static com.nttdatabc.mscreditos.utils.Constantes.PREFIX_PATH;
+
 
 /**
  * Controller de movements.
@@ -84,7 +86,7 @@ public class MovementController implements MovementControllerApi {
   }
 
   @GetMapping("/movement_credits/has_debt/{customerId}")
-  public ResponseEntity<Mono<HasDebtResponse>>hasDebtCreditCustomer(@PathVariable String customerId){
+  public ResponseEntity<Mono<HasDebtResponse>> hasDebtCreditCustomer(@PathVariable String customerId){
     return new ResponseEntity<>(movementServiceImpl.hasDebtCreditCustomerService(customerId)
         .doOnSubscribe(unused -> log.info("hasDebtCreditCustomer:: iniciando"))
         .doOnError(throwable -> log.error("hasDebtCreditCustomer:: error " + throwable.getMessage()))

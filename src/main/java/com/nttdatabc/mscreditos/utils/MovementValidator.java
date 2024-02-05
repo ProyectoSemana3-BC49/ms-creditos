@@ -1,15 +1,13 @@
 package com.nttdatabc.mscreditos.utils;
 
+import static com.nttdatabc.mscreditos.utils.Constantes.*;
+
 import com.nttdatabc.mscreditos.model.MovementCredit;
 import com.nttdatabc.mscreditos.model.PaidInstallment;
 import com.nttdatabc.mscreditos.service.CreditServiceImpl;
 import com.nttdatabc.mscreditos.utils.exceptions.errors.ErrorResponseException;
-import java.util.Optional;
-import java.util.function.Predicate;
 import org.springframework.http.HttpStatus;
 import reactor.core.publisher.Mono;
-
-import static com.nttdatabc.mscreditos.utils.Constantes.*;
 
 /**
  * Clase movement validator.

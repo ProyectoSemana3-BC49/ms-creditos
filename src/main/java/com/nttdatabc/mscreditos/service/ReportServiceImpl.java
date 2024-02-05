@@ -1,22 +1,26 @@
 package com.nttdatabc.mscreditos.service;
 
+import static com.nttdatabc.mscreditos.utils.Constantes.EX_ERROR_NOT_CARD_CREDIT;
+import static com.nttdatabc.mscreditos.utils.CreditValidator.verifyCustomerExists;
+
 import com.nttdatabc.mscreditos.model.BalanceAccounts;
 import com.nttdatabc.mscreditos.model.MovementCredit;
 import com.nttdatabc.mscreditos.model.SummaryAccountBalance;
+import com.nttdatabc.mscreditos.model.enums.TypeCredit;
 import com.nttdatabc.mscreditos.repository.CreditRepository;
 import com.nttdatabc.mscreditos.repository.MovementRepository;
 import com.nttdatabc.mscreditos.service.interfaces.ReportService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
+import com.nttdatabc.mscreditos.utils.exceptions.errors.ErrorResponseException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import static com.nttdatabc.mscreditos.utils.CreditValidator.verifyCustomerExists;
 
 @Service
 public class ReportServiceImpl implements ReportService {
@@ -64,5 +68,14 @@ public class ReportServiceImpl implements ReportService {
               .doOnNext(summaryAccountBalances -> balanceAccounts.setSummaryAccounts(summaryAccountBalances))
               .thenReturn(balanceAccounts);
         });
+  }
+
+  @Override
+  public Flux<MovementCredit> getLastMovementsCardCreditService(String creditId) {
+    return creditServiceImpl.getCreditByIdService(creditId)
+        .filter(credit -> credit.getTypeCredit().equalsIgnoreCase(TypeCredit.TARJETA.toString()))
+        .switchIfEmpty(Mono.error(new ErrorResponseException(EX_ERROR_NOT_CARD_CREDIT, HttpStatus.CONFLICT.value(), HttpStatus.CONFLICT)))
+        .thenMany(movementRepository.findTop10ByOrderByDayCreatedDesc(creditId));
+
   }
 }

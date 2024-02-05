@@ -1,5 +1,8 @@
 package com.nttdatabc.mscreditos.service;
 
+import static com.nttdatabc.mscreditos.utils.Constantes.*;
+import static com.nttdatabc.mscreditos.utils.MovementValidator.*;
+
 import com.nttdatabc.mscreditos.model.Credit;
 import com.nttdatabc.mscreditos.model.HasDebtResponse;
 import com.nttdatabc.mscreditos.model.MovementCredit;
@@ -9,22 +12,16 @@ import com.nttdatabc.mscreditos.repository.MovementRepository;
 import com.nttdatabc.mscreditos.service.interfaces.MovementService;
 import com.nttdatabc.mscreditos.utils.Utilitarios;
 import com.nttdatabc.mscreditos.utils.exceptions.errors.ErrorResponseException;
-import org.checkerframework.checker.units.qual.C;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.nttdatabc.mscreditos.utils.Constantes.*;
-import static com.nttdatabc.mscreditos.utils.CreditValidator.verifyCustomerExists;
-import static com.nttdatabc.mscreditos.utils.MovementValidator.*;
 
 /**
  * Clase service movements.
@@ -35,6 +32,7 @@ public class MovementServiceImpl implements MovementService {
   private MovementRepository movementRepository;
   @Autowired
   private CreditServiceImpl creditServiceImpl;
+
   @Override
   public Mono<Void> createMovementCreditService(MovementCredit movementCredit) {
     return validateMovementNoNulls(movementCredit)
@@ -141,26 +139,26 @@ public class MovementServiceImpl implements MovementService {
     return
         creditServiceImpl.getCreditsByCustomerId(customerId)
             .switchIfEmpty(Mono.just(new Credit()))
-        .flatMap(creditCustomer -> {
-          if(creditCustomer.getId() == null){
-            return Mono.just(new HasDebtResponse(false));
-          }
-         return getMovementsCreditsByCreditIdService(creditCustomer.getId())
-             .filter(movementCredit -> movementCredit.getStatus().equals("ACTIVO"))
-             .any(movementCredit -> {
-               Integer dueDate = Integer.parseInt(movementCredit.getDueDate());
-               List<PaidInstallment> paidMents = movementCredit.getPaidInstallments();
-               if(paidMents.isEmpty()){
-                 return false;
-               }
-               Boolean isAfterPaid = paidMents.stream().anyMatch(paidInstallment -> {
-                 LocalDateTime dayPayment = LocalDateTime.parse(paidInstallment.getDatePayment());
-                 return dayPayment.getDayOfMonth() > dueDate;
-               });
-               return isAfterPaid;
+            .flatMap(creditCustomer -> {
+              if (creditCustomer.getId() == null) {
+                return Mono.just(new HasDebtResponse(false));
+              }
+              return getMovementsCreditsByCreditIdService(creditCustomer.getId())
+                  .filter(movementCredit -> movementCredit.getStatus().equals("ACTIVO"))
+                  .any(movementCredit -> {
+                    Integer dueDate = Integer.parseInt(movementCredit.getDueDate());
+                    List<PaidInstallment> paidMents = movementCredit.getPaidInstallments();
+                    if (paidMents.isEmpty()) {
+                      return false;
+                    }
+                    Boolean isAfterPaid = paidMents.stream().anyMatch(paidInstallment -> {
+                      LocalDateTime dayPayment = LocalDateTime.parse(paidInstallment.getDatePayment());
+                      return dayPayment.getDayOfMonth() > dueDate;
+                    });
+                    return isAfterPaid;
 
-             }).flatMap(aBoolean -> Mono.just(new HasDebtResponse(aBoolean)));
-        }).flatMap(Mono::just)
-        .single();
+                  }).flatMap(aBoolean -> Mono.just(new HasDebtResponse(aBoolean)));
+            }).flatMap(Mono::just)
+            .single();
   }
 }

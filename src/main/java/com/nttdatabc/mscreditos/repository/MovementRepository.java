@@ -11,5 +11,6 @@ import reactor.core.publisher.Flux;
 @Repository
 public interface MovementRepository extends ReactiveMongoRepository<MovementCredit, String> {
   Flux<MovementCredit> findByCreditId(String creditId);
+  Flux<MovementCredit> findTop10ByOrderByDayCreatedDesc(String creditId);
 }
 

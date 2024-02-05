@@ -284,6 +284,34 @@ paths:
         '404':
           description: Recurso no encontrado
 
+  /report_credit/last_movements_card_credit/{credit_id}:
+    get:
+      operationId: getLastMovementsCardCredit
+      summary: Obtener los ultimos 10 movimientos de la tarjeta de crédito.
+      tags:
+        - Reportes
+      parameters:
+        - name: credit_id
+          in: path
+          description: ID del crédito
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reporte de saldos promedios.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MovementCredit'
+        '400':
+          description: Error en request
+        '404':
+          description: Recurso no encontrado
+
+
 
 
 components:

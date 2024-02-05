@@ -1,5 +1,7 @@
 package com.nttdatabc.mscreditos.controller;
 
+import static com.nttdatabc.mscreditos.utils.Constantes.PREFIX_PATH;
+
 import com.nttdatabc.mscreditos.controller.interfaces.CreditControllerApi;
 import com.nttdatabc.mscreditos.model.Credit;
 import com.nttdatabc.mscreditos.service.CreditServiceImpl;
@@ -13,7 +15,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static com.nttdatabc.mscreditos.utils.Constantes.PREFIX_PATH;
+
 
 /**
  * Controller Credit.
